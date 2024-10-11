@@ -4,42 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Huffman Encoding Project</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <link rel="stylesheet" href="/style.css">
-   
-    <script src="/script.js" type="module"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Custom JavaScript -->
+    <script src="script.js" defer></script>
 </head>
 
 <body>
-    <nav class="navbar navbar-light " style="font-size: 25px; font-family: sans-serif; background-color: whitesmoke;">
-
-     
-        Huffman Encoding Project
+    <nav class="navbar navbar-light bg-light justify-content-center">
+        <span class="navbar-brand mb-0 h1" style="font-size: 25px; font-family: sans-serif;">Huffman Encoding Project</span>
     </nav>
-    <div id="container">
-        <div class="text_box" style="overflow-y: scroll">
-            <span id="treearea" style="width: 100%; text-align: center; font-size: medium;">
-                Tree Structure Will Be Displayed Here !!
-            </span>
-        </div>
-        <div class="text_box" style="overflow-y: scroll">
-            <span id="temptext" style="width: 100%; text-align: center; font-size: x-large;">
-                Operation info will be shown here !!
-            </span>
+
+    <div id="container" class="container-fluid my-4">
+        <div class="row">
+            <div class="col-md-6 text_box">
+                <h5 class="text-center">Tree Structure</h5>
+                <div id="treearea" class="border p-3" style="height: 300px; overflow-y: auto;">
+                    Tree Structure Will Be Displayed Here!!
+                </div>
+            </div>
+            <div class="col-md-6 text_box">
+                <h5 class="text-center">Operation Info</h5>
+                <div id="temptext" class="border p-3" style="height: 300px; overflow-y: auto; font-size: larger;">
+                    Operation info will be shown here!!
+                </div>
+            </div>
         </div>
     </div>
 
-    <div>
-        <form method="post" enctype="multipart/form-data" style="display: inline-block;">
-            <input type="file" id="uploadedFile"/>
+    <div class="container text-center mb-4">
+        <form id="fileForm" enctype="multipart/form-data" class="mb-3">
+            <div class="form-group">
+                <input type="file" id="uploadedFile" class="form-control-file" aria-label="File Upload">
+            </div>
         </form>
-        <br>
-        <button type="button" class="btn btn-success center_buttons" id="encode">&nbsp;&nbsp;Encode&nbsp;&nbsp;</button>
-        <br>
-        <button type="button" class="btn btn-danger center_buttons" id="decode">&nbsp;&nbsp;Decode&nbsp;&nbsp;</button>
+        <button type="button" class="btn btn-success mx-2" id="encode">Encode</button>
+        <button type="button" class="btn btn-danger mx-2" id="decode">Decode</button>
     </div>
 </body>
 
