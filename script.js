@@ -1,5 +1,6 @@
-class BinaryHeap {
+// script.js
 
+class BinaryHeap {
     constructor() {
         this.heap = [];
     }
@@ -13,291 +14,352 @@ class BinaryHeap {
         return this.heap.length;
     }
 
-    empty(){
-        return ( this.size()===0 );
+    isEmpty() {
+        return this.size() === 0;
     }
 
-    //using iterative approach
     bubbleUp() {
         let index = this.size() - 1;
+        const element = this.heap[index];
 
         while (index > 0) {
-            let element = this.heap[index],
-                parentIndex = Math.floor((index - 1) / 2),
-                parent = this.heap[parentIndex];
+            let parentIndex = Math.floor((index - 1) / 2);
+            let parent = this.heap[parentIndex];
 
-            if (parent[0] >= element[0]) break;
-            this.heap[index] = parent;
+            if (element[0] >= parent[0]) break;
+
             this.heap[parentIndex] = element;
-            index = parentIndex
+            this.heap[index] = parent;
+            index = parentIndex;
         }
     }
 
-    extractMax() {
-        const max = this.heap[0];
-        const tmp = this.heap.pop();
-        if(!this.empty()) {
-            this.heap[0] = tmp;
+    extractMin() {
+        if (this.isEmpty()) return null;
+        const min = this.heap[0];
+        const end = this.heap.pop();
+        if (!this.isEmpty()) {
+            this.heap[0] = end;
             this.sinkDown(0);
         }
-        return max;
+        return min;
     }
 
     sinkDown(index) {
-
-        let left = 2 * index + 1,
-            right = 2 * index + 2,
-            largest = index;
         const length = this.size();
+        const element = this.heap[index];
 
-        // console.log(this.heap[left], left, length, this.heap[right], right, length, this.heap[largest]);
+        while (true) {
+            let leftChildIdx = 2 * index + 1;
+            let rightChildIdx = 2 * index + 2;
+            let swap = null;
 
-        if (left < length && this.heap[left][0] > this.heap[largest][0]) {
-            largest = left
-        }
-        if (right < length && this.heap[right][0] > this.heap[largest][0]) {
-            largest = right
-        }
-        // swap
-        if (largest !== index) {
-            let tmp = this.heap[largest];
-            this.heap[largest] = this.heap[index];
-            this.heap[index] = tmp;
-            this.sinkDown(largest)
+            if (leftChildIdx < length) {
+                let leftChild = this.heap[leftChildIdx];
+                if (leftChild[0] < element[0]) {
+                    swap = leftChildIdx;
+                }
+            }
+
+            if (rightChildIdx < length) {
+                let rightChild = this.heap[rightChildIdx];
+                if (
+                    (swap === null && rightChild[0] < element[0]) ||
+                    (swap !== null && rightChild[0] < this.heap[swap][0])
+                ) {
+                    swap = rightChildIdx;
+                }
+            }
+
+            if (swap === null) break;
+            this.heap[index] = this.heap[swap];
+            this.heap[swap] = element;
+            index = swap;
         }
     }
 }
 
-
-
-class HuffmanCoder{
-
-    stringify(node){
-        if(typeof(node[1])==="string"){
-            return '\''+node[1];
-        }
-
-        return '0' + this.stringify(node[1][0]) + '1' + this.stringify(node[1][1]);
+class HuffmanCoder {
+    constructor() {
+        this.heap = new BinaryHeap();
+        this.mappings = {};
+        this.root = null;
     }
 
-    display(node, modify, index=1){
-        if(modify){
-            node = ['',node];
-            if(node[1].length===1)
-                node[1] = node[1][0];
+    stringify(node) {
+        if (typeof node === "string") {
+            return `'${node}`;
         }
-
-        if(typeof(node[1])==="string"){
-            return String(index) + " = " + node[1];
-        }
-
-        let left = this.display(node[1][0], modify, index*2);
-        let right = this.display(node[1][1], modify, index*2+1);
-        let res = String(index*2)+" <= "+index+" => "+String(index*2+1);
-        return res + '\n' + left + '\n' + right;
+        return `0${this.stringify(node[0])}1${this.stringify(node[1])}`;
     }
 
-    destringify(data){
-        let node = [];
-
-        if(this.ind>=data.length)
-        return node;
-
-
-        if(data[this.ind]==='\''){
-            this.ind++;
-            node.push(data[this.ind]);
-            this.ind++;
-            return node;
-        }
-      
-        this.ind++;
-        let left = this.destringify(data);
-        node.push(left);
-        this.ind++;
-        let right = this.destringify(data);
-        node.push(right);
-       
-        return node;
+    destringify(data) {
+        this.index = 0;
+        return this._destringifyHelper(data);
     }
 
-    getMappings(node, path){
-        if(typeof(node[1])==="string"){
-            this.mappings[node[1]] = path;
+    _destringifyHelper(data) {
+        if (this.index >= data.length) return null;
+
+        const char = data[this.index];
+        if (char === "'") {
+            this.index++;
+            const leaf = data[this.index];
+            this.index++;
+            return leaf;
+        }
+
+        if (char === '0') {
+            this.index++;
+            const left = this._destringifyHelper(data);
+            if (data[this.index] !== '1') {
+                throw new Error("Invalid serialization format.");
+            }
+            this.index++;
+            const right = this._destringifyHelper(data);
+            return [left, right];
+        }
+
+        throw new Error("Invalid serialization format.");
+    }
+
+    display(node, index = 1) {
+        if (typeof node === "string") {
+            return `${index} = ${node}`;
+        }
+
+        let left = this.display(node[0], index * 2);
+        let right = this.display(node[1], index * 2 + 1);
+        let res = `${index * 2} <= ${index} => ${index * 2 + 1}`;
+        return `${res}\n${left}\n${right}`;
+    }
+
+    getMappings(node, path) {
+        if (typeof node === "string") {
+            this.mappings[node] = path;
             return;
         }
 
-        this.getMappings(node[1][0], path+"0");
-        this.getMappings(node[1][1], path+"1");
+        this.getMappings(node[0], path + "0");
+        this.getMappings(node[1], path + "1");
     }
 
-    encode(data){
-
+    encode(data) {
+        // Reset heap and mappings
         this.heap = new BinaryHeap();
-
-        const mp = new Map();
-        for(let i=0;i<data.length;i++){
-            if(data[i] in mp){
-                mp[data[i]] = mp[data[i]] + 1;
-            } else{
-                mp[data[i]] = 1;
-            }
-        }
-
-        for(const key in mp){
-            this.heap.insert([-mp[key], key]);
-        }
-
-        while(this.heap.size() > 1){
-            const node1 = this.heap.extractMax();
-            const node2 = this.heap.extractMax();
-
-            const node = [node1[0]+node2[0],[node1,node2]];
-            this.heap.insert(node);
-        }
-        const huffman_encoder = this.heap.extractMax();
-
         this.mappings = {};
-        this.getMappings(huffman_encoder, "");
 
-        let binary_string = "";
-        for(let i=0;i<data.length;i++) {
-            binary_string = binary_string + this.mappings[data[i]];
+        // Frequency map
+        const freqMap = {};
+        for (let char of data) {
+            freqMap[char] = (freqMap[char] || 0) + 1;
         }
 
-        let rem = (8 - binary_string.length%8)%8;
-        let padding = "";
-        for(let i=0;i<rem;i++)
-            padding = padding + "0";
-        binary_string = binary_string + padding;
+        // Insert all characters into the heap
+        for (const [char, freq] of Object.entries(freqMap)) {
+            this.heap.insert([freq, char]);
+        }
 
-        let result = "";
-        for(let i=0;i<binary_string.length;i+=8){
-            let num = 0;
-            for(let j=0;j<8;j++){
-                num = num*2 + (binary_string[i+j]-"0");
+        // Edge case: empty data
+        if (this.heap.isEmpty()) {
+            throw new Error("Cannot encode empty data.");
+        }
+
+        // Edge case: single unique character
+        if (this.heap.size() === 1) {
+            const singleNode = this.heap.extractMin();
+            this.root = [singleNode[1], null];
+        } else {
+            // Build Huffman Tree
+            while (this.heap.size() > 1) {
+                const node1 = this.heap.extractMin();
+                const node2 = this.heap.extractMin();
+                const merged = [node1[1], node2[1]];
+                const mergedFreq = node1[0] + node2[0];
+                this.heap.insert([mergedFreq, merged]);
             }
-            result = result + String.fromCharCode(num);
+            this.root = this.heap.extractMin()[1];
         }
 
-        let final_res = this.stringify(huffman_encoder) + '\n' + rem + '\n' + result;
-        let info = "Compression Ratio : " + data.length/final_res.length;
-        info = "Compression complete and file sent for download" + '\n' + info;
-        return [final_res, this.display(huffman_encoder, false), info];
+        // Generate mappings
+        this.getMappings(this.root, "");
+
+        // Encode the data
+        let binaryString = "";
+        for (let char of data) {
+            binaryString += this.mappings[char];
+        }
+
+        // Calculate padding
+        const padding = (8 - (binaryString.length % 8)) % 8;
+        binaryString = binaryString.padEnd(binaryString.length + padding, '0');
+
+        // Convert binary string to bytes
+        const byteArray = [];
+        for (let i = 0; i < binaryString.length; i += 8) {
+            const byte = binaryString.slice(i, i + 8);
+            byteArray.push(parseInt(byte, 2));
+        }
+        const binaryData = String.fromCharCode(...byteArray);
+
+        // Serialize the tree
+        const serializedTree = this.stringify(this.root);
+
+        // Combine serialized tree, padding, and binary data
+        const finalResult = `${serializedTree}\n${padding}\n${binaryData}`;
+
+        // Calculate compression ratio
+        const originalSize = new TextEncoder().encode(data).length;
+        const compressedSize = new TextEncoder().encode(finalResult).length;
+        const compressionRatio = (originalSize / compressedSize).toFixed(2);
+
+        const info = `Compression complete.\nCompression Ratio: ${compressionRatio}:1`;
+
+        return [finalResult, this.display(this.root), info];
     }
 
-    decode(data){
-        data = data.split('\n');
-        if(data.length===4){
-            // Handling new line
-            data[0] = data[0] + '\n' + data[1];
-            data[1] = data[2];
-            data[2] = data[3];
-            data.pop();
+    decode(data) {
+        const parts = data.split('\n');
+        if (parts.length < 3) {
+            throw new Error("Invalid encoded data format.");
         }
 
-        this.ind = 0;
-        const huffman_decoder = this.destringify(data[0]);
-        const text = data[2];
-
-        let binary_string = "";
-        for(let i=0;i<text.length;i++){
-            let num = text[i].charCodeAt(0);
-            let bin = "";
-            for(let j=0;j<8;j++){
-                bin = num%2 + bin;
-                num = Math.floor(num/2);
-            }
-            binary_string = binary_string + bin;
+        // Reconstruct the serialized tree (might contain newlines)
+        let serializedTree = "";
+        let padding;
+        let binaryData;
+        if (parts.length === 3) {
+            [serializedTree, padding, binaryData] = parts;
+        } else {
+            // Handle cases where the serialized tree contains newlines
+            padding = parts[parts.length - 2];
+            binaryData = parts[parts.length - 1];
+            serializedTree = parts.slice(0, parts.length - 2).join('\n');
         }
-        binary_string = binary_string.substring(0,binary_string.length-data[1]);
 
-        console.log(binary_string.length);
+        // Deserialize the tree
+        this.root = this.destringify(serializedTree);
 
-        let res = "";
-        let node = huffman_decoder;
-        for(let i=0;i<binary_string.length;i++){
-            if(binary_string[i]==='0'){
-                node = node[0];
-            } else{
-                node = node[1];
-            }
+        // Decode binary data
+        let binaryString = "";
+        for (let char of binaryData) {
+            const byte = char.charCodeAt(0);
+            let bits = byte.toString(2).padStart(8, '0');
+            binaryString += bits;
+        }
 
-            if(typeof(node[0])==="string"){
-                res += node[0];
-                node = huffman_decoder;
+        // Remove padding
+        const paddingCount = parseInt(padding, 10);
+        if (isNaN(paddingCount) || paddingCount < 0 || paddingCount > 7) {
+            throw new Error("Invalid padding information.");
+        }
+        binaryString = binaryString.slice(0, binaryString.length - paddingCount);
+
+        // Decode the binary string using the Huffman tree
+        let decoded = "";
+        let node = this.root;
+        for (let bit of binaryString) {
+            node = bit === '0' ? node[0] : node[1];
+            if (typeof node === "string") {
+                decoded += node;
+                node = this.root;
             }
         }
-        let info = "Decompression complete and file sent for download";
-        return [res, this.display(huffman_decoder, true), info];
+
+        const info = "Decompression complete. File has been downloaded.";
+
+        return [decoded, this.display(this.root), info];
     }
 }
 
-
-
-onload = function () {
-    // Get reference to elements
+window.onload = function () {
+    // Get references to elements
     const treearea = document.getElementById('treearea');
-    const encode = document.getElementById('encode');
-    const decode = document.getElementById('decode');
+    const encodeBtn = document.getElementById('encode');
+    const decodeBtn = document.getElementById('decode');
     const temptext = document.getElementById('temptext');
     const upload = document.getElementById('uploadedFile');
 
     const coder = new HuffmanCoder();
 
-    upload.addEventListener('change',()=>{ alert("File uploaded") });
+    upload.addEventListener('change', () => {
+        if (upload.files.length > 0) {
+            temptext.innerText = `Selected file: ${upload.files[0].name}`;
+        } else {
+            temptext.innerText = "No file selected.";
+        }
+    });
 
-    encode.onclick = function () {
-
+    encodeBtn.onclick = function () {
         const uploadedFile = upload.files[0];
-        if(uploadedFile===undefined){
-            alert("No file uploaded !");
+        if (!uploadedFile) {
+            alert("No file uploaded!");
             return;
         }
+
         const fileReader = new FileReader();
-        fileReader.onload = function(fileLoadedEvent){
+        fileReader.onload = function (fileLoadedEvent) {
             const text = fileLoadedEvent.target.result;
-            if(text.length===0){
-                alert("Text can not be empty ! Upload another file !");
+            if (text.length === 0) {
+                alert("Text cannot be empty! Upload another file.");
                 return;
             }
-            let [encoded, tree_structure, info] = coder.encode(text);
-            downloadFile(uploadedFile.name.split('.')[0] +'_encoded.txt', encoded);
-            treearea.innerText = tree_structure;
-            treearea.style.marginTop = '2000px';
-            temptext.innerText = info;
+            try {
+                let [encoded, tree_structure, info] = coder.encode(text);
+                downloadFile(`${uploadedFile.name.split('.')[0]}_encoded.txt`, encoded);
+                treearea.innerText = tree_structure;
+                temptext.innerText = info;
+            } catch (error) {
+                alert(`Encoding failed: ${error.message}`);
+                console.error(error);
+            }
+        };
+        fileReader.onerror = function () {
+            alert("Error reading the file. Please try again.");
         };
         fileReader.readAsText(uploadedFile, "UTF-8");
     };
 
-    decode.onclick = function () {
-
+    decodeBtn.onclick = function () {
         const uploadedFile = upload.files[0];
-        if(uploadedFile===undefined){
-            alert("No file uploaded !");
+        if (!uploadedFile) {
+            alert("No file uploaded!");
             return;
         }
+
         const fileReader = new FileReader();
-        fileReader.onload = function(fileLoadedEvent){
+        fileReader.onload = function (fileLoadedEvent) {
             const text = fileLoadedEvent.target.result;
-            if(text.length===0){
-                alert("Text can not be empty ! Upload another file !");
+            if (text.length === 0) {
+                alert("Encoded text cannot be empty! Upload another file.");
                 return;
             }
-            let [decoded, tree_structure, info] = coder.decode(text);
-            downloadFile(uploadedFile.name.split('.')[0] +'_decoded.txt', decoded);
-            treearea.innerText = tree_structure;
-            treearea.style.marginTop = '2000px';
-            temptext.innerText = info;
+            try {
+                let [decoded, tree_structure, info] = coder.decode(text);
+                downloadFile(`${uploadedFile.name.split('.')[0]}_decoded.txt`, decoded);
+                treearea.innerText = tree_structure;
+                temptext.innerText = info;
+            } catch (error) {
+                alert(`Decoding failed: ${error.message}`);
+                console.error(error);
+            }
+        };
+        fileReader.onerror = function () {
+            alert("Error reading the file. Please try again.");
         };
         fileReader.readAsText(uploadedFile, "UTF-8");
     };
-
 };
 
-function downloadFile(fileName, data){
-    let a = document.createElement('a');
-    a.href = "data:application/octet-stream,"+encodeURIComponent(data);
+function downloadFile(fileName, data) {
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
