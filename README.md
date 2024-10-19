@@ -48,6 +48,3 @@ Huffman encoding is a popular algorithm used for lossless data compression. It a
 ## Installation & Setup
 No installation is required. Simply clone the repository and open `index.html` in your browser to use the tool locally.
 
-### Clone the repository
-```bash
-git clone https://github.com/your-username/file-zipper.git
