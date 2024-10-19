@@ -1,5 +1,5 @@
-## File Zipper: Huffman Encoding-based File Compression
-This project, File Zipper, is a simple file compression tool that uses the concept of Huffman Encoding to compress and decompress .txt files. It allows users to upload a text file, compress it using Huffman encoding, and later decompress it back to its original form. The tool also displays the Huffman Tree used for encoding and provides insights into the compression process.
+# File Zipper: Huffman Encoding-based File Compression
+**This project, File Zipper, is a simple file compression tool that uses the concept of Huffman Encoding to compress and decompress .txt files. It allows users to upload a text file, compress it using Huffman encoding, and later decompress it back to its original form. The tool also displays the Huffman Tree used for encoding and provides insights into the compression process.**
 
 Features
 File Upload: Upload any .txt file to be compressed.
